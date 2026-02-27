@@ -1,0 +1,78 @@
+# Imagem Docker base (Node.js LTS)
+image: node:20-alpine
+
+# Definição das etapas do pipeline
+stages:
+  - install
+  - test
+  - build
+  - deploy
+
+# Configuração de Cache para acelerar o processo
+# Cacheia o node_modules e o cache de build do Next.js
+cache:
+  key:
+    files:
+      - package-lock.json # ou yarn.lock
+  paths:
+    - node_modules/
+    - .next/cache/
+
+# --- JOB: Instalação ---
+install_dependencies:
+  stage: install
+  script:
+    - yarn install --frozen-lockfile # Instalação limpa baseada no lockfile (mais rápido e seguro para CI)
+  # Se usar yarn, troque por:
+  # - yarn install --frozen-lockfile
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - package-lock.json
+        - package.json
+
+# --- JOB: Testes e Qualidade ---
+lint_and_test:
+  stage: test
+  script:
+    - npm run lint
+    # Descomente a linha abaixo se tiver testes unitários configurados
+    # - npm run test
+  needs:
+    - job: install_dependencies
+      optional: true
+
+# --- JOB: Build ---
+build_app:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    name: 'nextjs-build-$CI_COMMIT_REF_NAME'
+    expire_in: 1 week
+    paths:
+      - .next/
+      - public/
+      - package.json
+      # Se estiver usando output: 'standalone', inclua:
+      # - .next/standalone/
+  needs:
+    - job: install_dependencies
+      optional: true
+
+# --- JOB: Deploy (Exemplo Genérico) ---
+deploy_production:
+  stage: deploy
+  script:
+    - echo "Iniciando deploy para produção..."
+    # Aqui você colocaria os comandos específicos do seu servidor/cloud.
+    # Exemplos:
+    # - scp -r .next user@server:/var/www/app
+    # - docker build -t my-app . && docker push my-app
+    # - npx vercel --prod --token $VERCEL_TOKEN
+  environment:
+    name: production
+    url: https://meu-site.com
+  only:
+    - main # Executa apenas na branch main
+  needs: ['build_app']

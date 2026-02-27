@@ -1,0 +1,90 @@
+name: Build and Deploy Next.js to Oracle VM
+
+on:
+  push:
+    tags:
+      - 'v*' # Execute on pushes to tags matching v*, e.g., v1.0.0
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies
+        working-directory: ./mf-frontend
+        # Runs yarn install if yarn.lock exists, otherwise npm ci
+        run: |
+          if [ -f yarn.lock ]; then yarn install --frozen-lockfile; else npm ci; fi
+
+      - name: Build Frontend
+        working-directory: ./mf-frontend
+        # Runs yarn build if using yarn, otherwise npm run build
+        run: |
+          if [ -f yarn.lock ]; then yarn build; else npm run build; fi
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          BACKEND_URL: http://backend:8080
+
+      - name: Prepare Deployment Bundle
+        run: |
+          # Create folder structure for deployment
+          mkdir -p deploy_bundle/mf-frontend
+          mkdir -p deploy_bundle/mf-backend
+          
+          # Copy backend (excluding heavy/unnecessary folders)
+          rsync -av --exclude='node_modules' --exclude='.git' mf-backend/ deploy_bundle/mf-backend/
+          
+          # Copy frontend production artifacts and dockerfile
+          cp mf-frontend/dockerfile deploy_bundle/mf-frontend/
+          cp -r mf-frontend/public deploy_bundle/mf-frontend/
+          # Copy .next folder which includes standalone build
+          cp -r mf-frontend/.next deploy_bundle/mf-frontend/
+          
+          # Copy docker-compose
+          cp docker-compose.yml deploy_bundle/
+          
+          # Compress everything to make SCP transfer much faster
+          cd deploy_bundle
+          tar -czf ../deploy.tar.gz .
+
+      - name: Copy bundle to Server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }} # Typically 22
+          source: "deploy.tar.gz"
+          target: "/tmp"
+
+      - name: Extract and Run Docker Compose on Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Set the destination directory on the server
+            APP_DIR="~/my-finance"
+            mkdir -p $APP_DIR
+            
+            # Extract the bundle
+            tar -xzf /tmp/deploy.tar.gz -C $APP_DIR
+            rm /tmp/deploy.tar.gz
+            
+            # Restart docker containers with the new frontend build
+            cd $APP_DIR
+            sudo docker compose down
+            sudo docker compose up --build -d
+            
+            # Clean up dangling images to free up space
+            sudo docker image prune -f

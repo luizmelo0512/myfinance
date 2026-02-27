@@ -1,0 +1,38 @@
+{
+  "name": "My Finance",
+  "short_name": "MyFinance",
+  "description": "Gerenciador de Finanças Pessoais",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icons/money-management.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/money-management.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "2940x1848",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Visualização no Computador"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "654x1338",
+      "type": "image/png",
+      "label": "Visualização no Celular"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  # Using Node 20
+  NODE_VERSION: "20"
+  NEXT_TELEMETRY_DISABLED: "1"
+  BACKEND_URL: "http://backend:8080"
+
+build_frontend:
+  image: node:${NODE_VERSION}-alpine
+  stage: build
+  script:
+    - cd mf-frontend
+    # Installs dependencies
+    - if [ -f yarn.lock ]; then yarn install --frozen-lockfile; else npm ci; fi
+    # Build Next.js
+    - if [ -f yarn.lock ]; then yarn build; else npm run build; fi
+    - cd ..
+    
+    # Prepare deployment bundle
+    - mkdir -p deploy_bundle/mf-frontend
+    - mkdir -p deploy_bundle/mf-backend
+    
+    # Copy backend (excluding node_modules)
+    - cp -a mf-backend/. deploy_bundle/mf-backend/ 2>/dev/null || true
+    - rm -rf deploy_bundle/mf-backend/node_modules deploy_bundle/mf-backend/.git
+    
+    # Copy frontend production artifacts and dockerfile
+    - cp mf-frontend/dockerfile deploy_bundle/mf-frontend/
+    - cp -a mf-frontend/public deploy_bundle/mf-frontend/
+    - cp -a mf-frontend/.next deploy_bundle/mf-frontend/
+    
+    # Copy docker-compose
+    - cp docker-compose.yml deploy_bundle/
+    
+    # Compress everything to make SCP transfer much faster
+    - cd deploy_bundle && tar -czf ../deploy.tar.gz .
+  artifacts:
+    paths:
+      - deploy.tar.gz
+    expire_in: 1 day
+  only:
+    - tags
+
+deploy_server:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    # Install ssh-agent and configure keys
+    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    # Auto-accept server SSH key
+    - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    # Setup deployment path
+    - APP_DIR="~/my-finance"
+    - ssh $SSH_USER@$SSH_HOST "mkdir -p $APP_DIR"
+    
+    # Upload compressed bundle
+    - scp deploy.tar.gz $SSH_USER@$SSH_HOST:/tmp/deploy.tar.gz
+    
+    # Connect and process deployment
+    - >
+      ssh $SSH_USER@$SSH_HOST "
+      APP_DIR=\"~/my-finance\" &&
+      tar -xzf /tmp/deploy.tar.gz -C \$APP_DIR &&
+      rm /tmp/deploy.tar.gz &&
+      cd \$APP_DIR &&
+      sudo docker compose down &&
+      sudo docker compose up --build -d &&
+      sudo docker image prune -f
+      "
+  only:
+    - tags
