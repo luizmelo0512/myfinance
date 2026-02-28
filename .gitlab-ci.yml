@@ -60,8 +60,8 @@ deploy_server:
     - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    # Setup deployment path
-    - APP_DIR="~/my-finance"
+    # Setup deployment path (Use an explicit absolute path to avoid tilde expansion issues in SSH subshells)
+    - APP_DIR="/home/$SSH_USER/my-finance"
     - ssh $SSH_USER@$SSH_HOST "mkdir -p $APP_DIR"
     
     # Upload compressed bundle
@@ -70,7 +70,7 @@ deploy_server:
     # Connect and process deployment
     - >
       ssh $SSH_USER@$SSH_HOST "
-      APP_DIR=\"~/my-finance\" &&
+      APP_DIR=\"/home/$SSH_USER/my-finance\" &&
       tar -xzf /tmp/deploy.tar.gz -C \$APP_DIR &&
       rm /tmp/deploy.tar.gz &&
       cd \$APP_DIR &&
