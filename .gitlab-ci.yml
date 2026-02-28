@@ -74,8 +74,8 @@ deploy_server:
       tar -xzf /tmp/deploy.tar.gz -C \$APP_DIR &&
       rm /tmp/deploy.tar.gz &&
       cd \$APP_DIR &&
-      sudo docker compose down &&
-      sudo docker compose up --build -d &&
+      sudo docker-compose down &&
+      sudo docker-compose up --build -d &&
       sudo docker image prune -f
       "
   only:
