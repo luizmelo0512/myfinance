@@ -54,7 +54,7 @@ deploy_server:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     # Write the SSH private key securely to a file to prevent Alpine libcrypto errors
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
     - ssh-add ~/.ssh/id_ed25519
     # Auto-accept server SSH key
