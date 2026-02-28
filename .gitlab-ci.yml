@@ -51,10 +51,11 @@ deploy_server:
     # Install ssh-agent and configure keys
     - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
     - eval $(ssh-agent -s)
-    # Decode the base64 SSH private key securely to a file (bulletproof method to avoid Alpine libcrypto errors)
-    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d > ~/.ssh/id_ed25519
-    - chmod 600 ~/.ssh/id_ed25519
-    - ssh-add ~/.ssh/id_ed25519
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    # Use GitLab CI native 'File' type variable to securely load the SSH key
+    - chmod 400 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
     # Auto-accept server SSH key
     - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
