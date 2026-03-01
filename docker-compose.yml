@@ -6,7 +6,7 @@ services:
     container_name: mf-backend
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "3001:8080"
     env_file:
       - ./mf-backend/.env
     environment:
@@ -32,7 +32,7 @@ services:
     container_name: mf-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "3000:80"
     environment:
       - BACKEND_URL=http://backend:8080
       - ORIGIN_URL=http://localhost
