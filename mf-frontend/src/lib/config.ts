@@ -1,8 +1,8 @@
 // src/lib/config.ts
 
 export const SITE_CONFIG = {
-  title: 'We Debt',
-  name: 'We Debt',
+  title: 'My Finance',
+  name: 'My Finance',
   version: '1.0.0',
   description: 'Controle suas dividas de forma simples e eficiente.',
   theme: {

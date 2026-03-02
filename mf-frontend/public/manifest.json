@@ -9,6 +9,18 @@
   "icons": [
     {
       "src": "/icons/money-management.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/money-management.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/money-management.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
@@ -32,6 +44,7 @@
       "src": "/screenshots/mobile.png",
       "sizes": "654x1338",
       "type": "image/png",
+      "form_factor": "narrow",
       "label": "Visualização no Celular"
     }
   ]

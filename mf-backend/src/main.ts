@@ -19,8 +19,8 @@ async function bootstrap() {
 
   // Configuração do Swagger
   const config = new DocumentBuilder()
-    .setTitle('We Debt API')
-    .setDescription('Api de consultas da aplicação We Debt.')
+    .setTitle('My Finance API')
+    .setDescription('Api de consultas da aplicação My Finance.')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

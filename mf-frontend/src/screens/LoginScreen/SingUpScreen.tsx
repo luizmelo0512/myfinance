@@ -83,7 +83,7 @@ const SignUpScreen = () => {
             {SITE_CONFIG.title.toUpperCase()}
           </CardTitle>
           <CardDescription className="text-center text-muted-foreground">
-            Crie sua conta para começar a usar o We Debt
+            Crie sua conta para começar a usar o My Finance
           </CardDescription>
         </CardHeader>
 

@@ -1,6 +1,6 @@
 # mf-frontend
 
-Interface web do We Debt, construida com Next.js (App Router) + shadcn/ui.
+Interface web do My Finance, construida com Next.js (App Router) + shadcn/ui.
 
 ## Tecnologias
 

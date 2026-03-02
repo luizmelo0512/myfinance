@@ -1,6 +1,6 @@
 # mf-backend
 
-API REST do We Debt, construida com NestJS + TypeORM + PostgreSQL (Neon).
+API REST do My Finance, construida com NestJS + TypeORM + PostgreSQL (Neon).
 
 ## Tecnologias
 
