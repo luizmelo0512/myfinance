@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LedgerModule } from './modules/ledgers/ledger.module.js';
 import { TransactionModule } from './modules/transactions/transaction.module.js';
 import { UserModule } from './modules/users/user.module.js';
+import { FriendModule } from './modules/friends/friend.module.js';
 // Importar entities explicitamente
 import { User } from './modules/better-auth/entity/user.entity.js';
 import { Account } from './modules/better-auth/entity/account.entity.js';
@@ -31,6 +32,7 @@ import { Transaction } from './modules/transactions/entity/transaction.entity.js
     }),
     AuthModule.forRoot({ auth }),
     UserModule,
+    FriendModule,
     LedgerModule,
     TransactionModule,
   ],

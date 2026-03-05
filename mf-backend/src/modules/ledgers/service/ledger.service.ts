@@ -54,4 +54,24 @@ export class LedgerService {
 
     return { ...ledger, balance };
   }
+
+  // 4. Deletar uma conta de dívida (apenas o owner)
+  async delete(id: string, userId: string) {
+    const ledger = await this.ledgerRepository.findOne({
+      where: { id },
+    });
+
+    if (!ledger) {
+      throw new NotFoundException('Dívida não encontrada.');
+    }
+
+    if (ledger.ownerId !== userId) {
+      throw new NotFoundException(
+        'Apenas o criador da dívida pode excluí-la.',
+      );
+    }
+
+    await this.ledgerRepository.remove(ledger);
+    return { message: 'Dívida excluída com sucesso.' };
+  }
 }

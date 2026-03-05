@@ -67,3 +67,29 @@ export function useCreateLedger() {
 
   return { createLedger, loading, error, reset };
 }
+
+// Hook para deletar uma dívida
+export function useDeleteLedger() {
+  const { execute, loading, error, reset } = useFetch<{ message: string }>();
+
+  const deleteLedger = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const response = await execute(`/ledger/${id}`, {
+          method: 'DELETE',
+        });
+        if (response) {
+          toast.success('Dívida excluída com sucesso!');
+          return true;
+        }
+        return false;
+      } catch {
+        toast.error('Erro ao excluir dívida.');
+        return false;
+      }
+    },
+    [execute],
+  );
+
+  return { deleteLedger, loading, error, reset };
+}

@@ -4,6 +4,7 @@ import {
   IsString,
   IsOptional,
   IsUUID,
+  IsDateString,
 } from 'class-validator';
 import { TransactionType } from '../entity/transaction.entity.js';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -38,4 +39,12 @@ export class CreateTransactionDto {
     example: 'UUID da Divida',
   })
   ledgerId: string; // ID da dívida à qual esta transação pertence
+
+  @IsDateString()
+  @IsOptional()
+  @ApiPropertyOptional({
+    description: 'Data da movimentação (quando o evento aconteceu). Se não informar, usa a data atual.',
+    example: '2026-01-15',
+  })
+  transactionDate?: string;
 }

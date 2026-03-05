@@ -3,6 +3,9 @@ export interface Transaction {
   amount: number;
   type: TransactionType;
   description: string | null;
+  transactionDate: string | null;
+  createdById: string | null;
+  createdByName: string | null;
   createdAt: string;
   ledgerId: string;
 }
@@ -37,4 +40,5 @@ export interface CreateTransactionRequest {
   type: TransactionType;
   description?: string;
   ledgerId: string;
+  transactionDate?: string;
 }

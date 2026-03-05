@@ -2,6 +2,7 @@ import { SITE_CONFIG } from '@lib/config';
 import type { Metadata, Viewport } from 'next';
 import { Geist } from 'next/font/google';
 import { Toaster } from '../components/ui/sonner';
+import { ThemeProvider } from '../components/theme-provider';
 import './globals.css';
 
 const geistSans = Geist({
@@ -20,7 +21,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: SITE_CONFIG.title,
   description: SITE_CONFIG.description,
-  manifest: '/manifest.json', // Importante!
+  manifest: '/manifest.json',
   other: {
     'mobile-web-app-capable': 'yes',
   },
@@ -37,10 +38,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br" className="dark">
+    <html lang="pt-br" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
-        <Toaster richColors />
-        {children}
+        <ThemeProvider>
+          <Toaster richColors />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

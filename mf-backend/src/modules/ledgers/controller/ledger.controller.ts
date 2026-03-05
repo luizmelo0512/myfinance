@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { LedgerService } from '../service/ledger.service.js';
@@ -25,5 +25,10 @@ export class LedgerController {
   @Get(':id')
   findOne(@Param('id') id: string, @Session() session: UserSession) {
     return this.ledgersService.findOneWithBalance(id, session.user.id);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string, @Session() session: UserSession) {
+    return this.ledgersService.delete(id, session.user.id);
   }
 }

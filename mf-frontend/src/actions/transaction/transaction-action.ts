@@ -31,3 +31,29 @@ export function useCreateTransaction() {
 
   return { createTransaction, loading, error, reset };
 }
+
+// Hook para deletar uma transação
+export function useDeleteTransaction() {
+  const { execute, loading, error, reset } = useFetch<{ message: string }>();
+
+  const deleteTransaction = useCallback(
+    async (transactionId: string): Promise<boolean> => {
+      try {
+        const response = await execute(`/transactions/${transactionId}`, {
+          method: 'DELETE',
+        });
+        if (response) {
+          toast.success('Transação excluída com sucesso!');
+          return true;
+        }
+        return false;
+      } catch {
+        toast.error('Erro ao excluir transação.');
+        return false;
+      }
+    },
+    [execute],
+  );
+
+  return { deleteTransaction, loading, error, reset };
+}

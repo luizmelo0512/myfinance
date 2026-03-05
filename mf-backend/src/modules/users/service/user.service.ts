@@ -10,8 +10,5 @@ export class UserService {
     private readonly repository: Repository<User>,
   ) {}
 
-  async findAll(userId: string) {
-    const users = await this.repository.find();
-    return users;
-  }
+
 }

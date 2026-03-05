@@ -19,13 +19,7 @@ export class UserController {
     return { user: session.user };
   }
 
-  @UseGuards(AuthGuard)
-  @Get('listUsers')
-  async getAll(@Session() session: UserSession) {
-    const users = await this.userService.findAll(session.user.id);
-    console.log('Users found:', users);
-    return { users};
-  }
+
 
   @Get('public')
   @AllowAnonymous() // Allow anonymous access

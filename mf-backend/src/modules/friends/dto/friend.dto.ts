@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class FriendDto {
-   @IsString()
+  @IsString()
   @IsNotEmpty({ message: 'O ID do amigo é obrigatório.' })
   @ApiProperty({
     description: 'ID do amigo a ser adicionado.',

@@ -1,11 +1,20 @@
-import { Controller, Post, Body, ForbiddenException } from '@nestjs/common';
-import { Session } from '@thallesp/nestjs-better-auth';
+import {
+  Controller,
+  Post,
+  Delete,
+  Body,
+  Param,
+  ForbiddenException,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard, Session } from '@thallesp/nestjs-better-auth';
 import type { UserSession } from '@thallesp/nestjs-better-auth';
 import { TransactionService } from '../service/transaction.service.js';
 import { LedgerService } from '../../ledgers/service/ledger.service.js';
 import { CreateTransactionDto } from '../dto/transaction.dto.js';
 
 @Controller('transactions')
+@UseGuards(AuthGuard)
 export class TransactionController {
   constructor(
     private readonly transactionService: TransactionService,
@@ -29,6 +38,18 @@ export class TransactionController {
       );
     }
 
-    return this.transactionService.create(dto);
+    return this.transactionService.create(
+      dto,
+      session.user.id,
+      session.user.name,
+    );
+  }
+
+  @Delete(':id')
+  async delete(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+  ) {
+    return this.transactionService.delete(id, session.user.id);
   }
 }

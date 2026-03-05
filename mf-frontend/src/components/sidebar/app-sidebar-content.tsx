@@ -1,4 +1,11 @@
-import { HandCoins, LayoutDashboard, LucideIcon } from 'lucide-react';
+import {
+  BarChart3,
+  HandCoins,
+  LayoutDashboard,
+  LucideIcon,
+  Settings,
+  Users,
+} from 'lucide-react';
 
 import {
   SidebarContent,
@@ -15,7 +22,7 @@ interface NavItemType {
   icon: LucideIcon;
 }
 
-const navItems: NavItemType[] = [
+const financialItems: NavItemType[] = [
   {
     title: 'Dashboard',
     url: '/dashboard',
@@ -25,6 +32,24 @@ const navItems: NavItemType[] = [
     title: 'Dívidas',
     url: '/ledgers',
     icon: HandCoins,
+  },
+  {
+    title: 'Amigos',
+    url: '/friends',
+    icon: Users,
+  },
+  {
+    title: 'Relatórios',
+    url: '/reports',
+    icon: BarChart3,
+  },
+];
+
+const systemItems: NavItemType[] = [
+  {
+    title: 'Configurações',
+    url: '/settings',
+    icon: Settings,
   },
 ];
 
@@ -36,7 +61,25 @@ function SideBarContentComponent() {
           Financeiro
         </SidebarGroupLabel>
         <SidebarMenu>
-          {navItems.map((item) => (
+          {financialItems.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild tooltip={item.title}>
+                <a href={item.url}>
+                  <item.icon className="text-primary" />
+                  <span className="text-foreground">{item.title}</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+
+      <SidebarGroup>
+        <SidebarGroupLabel className="text-foreground/60">
+          Sistema
+        </SidebarGroupLabel>
+        <SidebarMenu>
+          {systemItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild tooltip={item.title}>
                 <a href={item.url}>

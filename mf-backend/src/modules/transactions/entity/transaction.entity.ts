@@ -27,6 +27,18 @@ export class Transaction {
   @Column({ nullable: true })
   description: string;
 
+  // Data da movimentação (quando o evento realmente aconteceu)
+  @Column({ type: 'timestamp', nullable: true })
+  transactionDate: Date;
+
+  // Auditoria: quem registrou esta transação
+  @Column({ nullable: true })
+  createdById: string;
+
+  @Column({ nullable: true })
+  createdByName: string;
+
+  // Data de inserção no sistema (automática)
   @CreateDateColumn()
   createdAt: Date;
 
