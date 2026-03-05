@@ -1,5 +1,7 @@
 'use client';
 
+import { Skeleton } from '@/src/components/ui/skeleton';
+
 import { useLedgerList } from '@/src/actions/ledger/ledger-action';
 import { useListFriends } from '@/src/actions/friend/friend-action';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
@@ -370,9 +372,39 @@ export const ReportsScreen = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-primary font-mono animate-pulse">CARREGANDO RELATÓRIOS...</p>
+      <div className="p-4 sm:p-0 space-y-6 animate-in fade-in duration-300">
+        <div className="flex justify-between items-end">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-36" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+          <div className="hidden sm:flex gap-2">
+            <Skeleton className="h-10 w-36 rounded-xl" />
+            <Skeleton className="h-10 w-28 rounded-xl" />
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="p-6 rounded-2xl border border-border/40 bg-card/80 space-y-3">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-9 w-9 rounded-xl" />
+              </div>
+              <Skeleton className="h-7 w-28" />
+              <Skeleton className="h-3 w-36" />
+            </div>
+          ))}
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-border/40 bg-card/60 p-6 space-y-4">
+            <Skeleton className="h-5 w-44" />
+            <Skeleton className="h-56 w-full rounded-xl" />
+          </div>
+          <div className="rounded-2xl border border-border/40 bg-card/60 p-6 space-y-4">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-56 w-full rounded-xl" />
+          </div>
+        </div>
       </div>
     );
   }

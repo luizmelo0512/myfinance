@@ -1,5 +1,7 @@
 'use client';
 
+import { Skeleton } from '@/src/components/ui/skeleton';
+
 import { useLedgerList } from '@/src/actions/ledger/ledger-action';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -179,11 +181,33 @@ const HomeScreen = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin shadow-[0_0_15px_var(--primary)]" />
-        <p className="text-primary font-mono animate-pulse">
-          CARREGANDO SISTEMA...
-        </p>
+      <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+        <div className="flex justify-between items-end">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-40" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <div className="hidden sm:flex gap-2">
+            <Skeleton className="h-10 w-36 rounded-xl" />
+            <Skeleton className="h-10 w-28 rounded-xl" />
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-6 rounded-2xl border border-border/40 bg-card/60 space-y-4">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-10 rounded-xl" />
+              </div>
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-3 w-40" />
+            </div>
+          ))}
+        </div>
+        <div className="rounded-2xl border border-border/40 bg-card/60 p-6 space-y-4">
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
       </div>
     );
   }

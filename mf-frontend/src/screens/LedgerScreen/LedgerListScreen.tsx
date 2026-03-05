@@ -1,5 +1,7 @@
 'use client';
 
+import { Skeleton } from '@/src/components/ui/skeleton';
+
 import { useLedgerList } from '@/src/actions/ledger/ledger-action';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -23,6 +25,7 @@ const LedgerListScreen = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'settled'>('all');
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const { fetchLedgers, loading } = useLedgerList();
 
@@ -35,6 +38,9 @@ const LedgerListScreen = () => {
     let ignore = false;
     fetchLedgers().then((data) => {
       if (!ignore && data) setLedgers(data);
+      if (!ignore) setInitialLoading(false);
+    }).catch(() => {
+      if (!ignore) setInitialLoading(false);
     });
     return () => {
       ignore = true;
@@ -50,13 +56,46 @@ const LedgerListScreen = () => {
     }, 0);
   };
 
-  if (loading && ledgers.length === 0) {
+  if (initialLoading || (loading && ledgers.length === 0)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin shadow-[0_0_15px_var(--primary)]" />
-        <p className="text-primary font-mono animate-pulse">
-          CARREGANDO DÍVIDAS...
-        </p>
+      <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+        <div className="flex justify-between items-end">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <div className="hidden sm:flex gap-2">
+            <Skeleton className="h-10 w-28 rounded-xl" />
+            <Skeleton className="h-10 w-32 rounded-xl" />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-8 w-24 rounded-full" />)}
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-border/40 bg-card/60 p-6 space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-36" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </div>
+              <div className="flex justify-between">
+                <div className="space-y-1">
+                  <Skeleton className="h-3 w-12" />
+                  <Skeleton className="h-7 w-28" />
+                </div>
+                <div className="space-y-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-7 w-8" />
+                </div>
+              </div>
+              <Skeleton className="h-3 w-32" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

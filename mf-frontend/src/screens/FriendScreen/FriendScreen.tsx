@@ -1,5 +1,7 @@
 'use client';
 
+import { Skeleton } from '@/src/components/ui/skeleton';
+
 import { useLinkFriend, useListFriends } from '@/src/actions/friend/friend-action';
 import { useLedgerList } from '@/src/actions/ledger/ledger-action';
 import { Button } from '@/src/components/ui/button';
@@ -28,6 +30,7 @@ export const FriendScreen = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newFriendEmail, setNewFriendEmail] = useState('');
   const [fabOpen, setFabOpen] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     const [fetchedFriends, fetchedLedgers] = await Promise.all([
@@ -63,6 +66,7 @@ export const FriendScreen = () => {
 
       setFriends(friendsWithBalances);
     }
+    setInitialLoading(false);
   }, [listAllFriends, fetchLedgers]);
 
   useEffect(() => {
@@ -91,11 +95,36 @@ export const FriendScreen = () => {
 
   const loading = loadingFriends || loadingLedgers;
 
-  if (loading && friends.length === 0) {
+  if (initialLoading || (loading && friends.length === 0)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin shadow-[0_0_15px_var(--primary)]" />
-        <p className="text-primary font-mono animate-pulse">CARREGANDO AMIGOS...</p>
+      <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+        <div className="flex justify-between items-end">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+          <div className="hidden sm:flex gap-2">
+            <Skeleton className="h-10 w-28 rounded-xl" />
+            <Skeleton className="h-10 w-36 rounded-xl" />
+          </div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-border/40 bg-card/60 p-6 space-y-4">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-3 w-40" />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

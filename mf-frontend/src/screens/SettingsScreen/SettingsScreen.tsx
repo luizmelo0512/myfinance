@@ -1,5 +1,6 @@
 'use client';
 
+import { Skeleton } from '@/src/components/ui/skeleton';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/src/components/ui/card';
 import { Button } from '@/src/components/ui/button';
@@ -28,9 +29,29 @@ export const SettingsScreen = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-primary font-mono animate-pulse">CARREGANDO...</p>
+      <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-300 max-w-4xl mx-auto">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-44" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="rounded-2xl border border-border/40 bg-card/60 p-6 space-y-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-14 w-14 rounded-2xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-36" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Skeleton className="h-16 rounded-xl" />
+            <Skeleton className="h-16 rounded-xl" />
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+        </div>
+        <Skeleton className="h-32 rounded-2xl" />
       </div>
     );
   }
