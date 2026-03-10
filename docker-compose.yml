@@ -18,9 +18,9 @@ services:
   # Java Quarkus JVM Backend (Low-RAM Build)
   mf-backend:
     build:
-      context: ./mf-backend-java
+      context: ./mf-backend
       dockerfile: src/main/docker/Dockerfile.jvm
-    container_name: mf-backend-java
+    container_name: mf-backend
     ports:
       - "8080:8080"
     environment:
@@ -30,4 +30,4 @@ services:
       - TRUSTED_ORIGINS=http://localhost:3000
     restart: unless-stopped
     volumes:
-      - ./mf-backend-java/wallet:/wallet:ro
+      - ./mf-backend/wallet:/wallet:ro

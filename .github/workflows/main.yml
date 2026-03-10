@@ -1,0 +1,54 @@
+name: GCP Deploy - MyFinance
+
+on:
+  push:
+    branches:
+      - main # Dispara toda vez que um commit for feito na branch principal
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      # ==== FRONTEND BUILD (Ocorre na nuvem do GitHub, poupa CPU/RAM do seu servidor GCP) ====
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: './mf-frontend/yarn.lock'
+          
+      - name: Install dependencies & Build Frontend
+        working-directory: ./mf-frontend
+        # A variável API_URL falsa garante o sucesso da build sem bater na API viva. 
+        # O NextJS Runtime injetará o domínio real pelas envs do servidor depois.
+        run: |
+          yarn install --frozen-lockfile
+          NEXT_PUBLIC_API_URL=http://localhost:8080 yarn build
+
+      # ==== DEPLOY TO GCP ====
+      - name: Send to GCP via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          # Manda todos os arquivos com exceção de node_modules locais e lixo (A build .next recém gerada vai junto)
+          source: ".,!node_modules,!rf-frontend/node_modules,!.git"
+          target: "~/my-finance"
+
+      - name: Execute Docker Compose on GCP
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          # Note: Para servidores pequenos (1GB RAM) certifique se de estar rodando 
+          # o Java com src/main/docker/Dockerfile.jvm e não o "native" no seu docker-compose.
+          script: |
+            cd ~/my-finance
+            docker-compose down
+            docker-compose up -d --build

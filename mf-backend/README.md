@@ -1,61 +1,63 @@
-# mf-backend
+# mf-backend-java
 
-API REST do My Finance, construida com NestJS + TypeORM + PostgreSQL (Neon).
+This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
-## Tecnologias
+If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
 
-- **NestJS 11** - Framework HTTP
-- **TypeORM** - ORM para PostgreSQL
-- **Better Auth** - Autenticacao (email/senha, sessoes via cookie)
-- **Swagger** - Documentacao da API em `/api/docs`
+## Running the application in dev mode
 
-## Variaveis de Ambiente
+You can run your application in dev mode that enables live coding using:
 
-Copie `.env.example` para `.env` e preencha:
-
-```env
-NODE_ENV=development
-DATABASE_URL=postgresql://user:password@host/database?sslmode=require
-SECRET_KEY=sua-chave-secreta
-BASE_URL=http://localhost
-PORT=80
-TRUSTED_ORIGINS=http://localhost:3000
+```shell script
+./mvnw quarkus:dev
 ```
 
-## Rodando Localmente (sem Docker)
+> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
 
-```bash
-npm install
-npm run dev
+## Packaging and running the application
+
+The application can be packaged using:
+
+```shell script
+./mvnw package
 ```
 
-A API estara disponivel em `http://localhost:80`.
-Swagger em `http://localhost:80/api/docs`.
+It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
+Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
 
-## Rodando com Docker
+The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
 
-Consulte o `README.md` na raiz do projeto para instrucoes com Docker Compose.
+If you want to build an _über-jar_, execute the following command:
 
-## Scripts Disponiveis
+```shell script
+./mvnw package -Dquarkus.package.jar.type=uber-jar
+```
 
-| Comando | Descricao |
-|---|---|
-| `npm run dev` | Modo desenvolvimento com watch |
-| `npm run build` | Compilar para producao |
-| `npm run start:prod` | Rodar build compilado |
-| `npm run lint` | Rodar ESLint |
-| `npm run test` | Rodar testes unitarios |
-| `npm run test:e2e` | Rodar testes end-to-end |
+The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
 
-## Endpoints Principais
+## Creating a native executable
 
-| Metodo | Rota | Descricao |
-|---|---|---|
-| POST | `/api/auth/sign-up/email` | Criar conta |
-| POST | `/api/auth/sign-in/email` | Login |
-| POST | `/api/auth/sign-out` | Logout |
-| GET | `/api/users/me` | Perfil do usuario logado |
-| GET | `/api/ledger` | Listar dividas |
-| POST | `/api/ledger` | Criar divida |
-| GET | `/api/ledger/:id` | Detalhes de uma divida |
-| POST | `/api/transactions` | Criar transacao |
+You can create a native executable using:
+
+```shell script
+./mvnw package -Dnative
+```
+
+Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+
+```shell script
+./mvnw package -Dnative -Dquarkus.native.container-build=true
+```
+
+You can then execute your native executable with: `./target/mf-backend-java-1.0.0-runner`
+
+If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+
+## Related Guides
+
+- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
+- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
+- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Validate object properties (field, getter) and method parameters for your beans (REST, CDI, Jakarta Persistence)
+- SmallRye JWT ([guide](https://quarkus.io/guides/security-jwt)): Secure your applications with JSON Web Token
+- Flyway ([guide](https://quarkus.io/guides/flyway)): Handle your database schema migrations
+- JDBC Driver - Oracle ([guide](https://quarkus.io/guides/datasource)): Connect to the Oracle database via JDBC
