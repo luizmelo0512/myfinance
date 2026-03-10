@@ -45,7 +45,10 @@ fi
 echo "📦 Construindo o frontend (Next.js) usando Docker..."
 if [ -d "mf-frontend" ]; then
     # Usa uma imagem Node para instalar dependências e fazer o build
+    # Limitamos a RAM do container para não estourar a memória (1GB) da VM
     docker run --rm \
+      -m 700m \
+      -e NODE_OPTIONS="--max-old-space-size=512" \
       -v "$(pwd)/mf-frontend:/app" \
       -w /app \
       node:20 \
