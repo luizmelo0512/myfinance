@@ -86,7 +86,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Set the destination directory on the server
-            APP_DIR="~/workspace/myfinance"
+            # Using the new user's home directory to avoid permission issues with luizpwmelo's files
+            APP_DIR="/home/github-actions-deploy/myfinance"
             mkdir -p $APP_DIR
             
             # Extract the bundle
