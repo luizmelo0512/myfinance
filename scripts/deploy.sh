@@ -30,6 +30,15 @@ fi
 echo "⏹️ Parando containers em execução..."
 docker compose down
 
+echo "📦 Construindo o backend (Quarkus) com Maven..."
+if [ -d "mf-backend" ]; then
+    cd mf-backend
+    ./mvnw clean package -DskipTests
+    cd ..
+else
+    echo "⚠️ Diretório mf-backend não encontrado. Pulando build do Maven."
+fi
+
 echo "🏗️ Construindo e subindo os novos containers em background..."
 docker compose up -d --build
 
