@@ -42,6 +42,19 @@ else
     echo "⚠️ Diretório mf-backend não encontrado. Pulando build do Maven."
 fi
 
+echo "📦 Construindo o frontend (Next.js) usando Docker..."
+if [ -d "mf-frontend" ]; then
+    # Usa uma imagem Node para instalar dependências e fazer o build
+    docker run --rm \
+      -v "$(pwd)/mf-frontend:/app" \
+      -w /app \
+      node:20 \
+      sh -c "npm install && npm run build"
+else
+    echo "⚠️ Diretório mf-frontend não encontrado. Pulando build do Next.js."
+fi
+
+
 echo "🏗️ Construindo e subindo os novos containers em background..."
 docker compose up -d --build
 
