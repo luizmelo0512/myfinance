@@ -78,11 +78,8 @@ export function useDeleteLedger() {
         const response = await execute(`/ledger/${id}`, {
           method: 'DELETE',
         });
-        if (response) {
-          toast.success('Dívida excluída com sucesso!');
-          return true;
-        }
-        return false;
+        toast.success('Dívida excluída com sucesso!');
+        return true;
       } catch {
         toast.error('Erro ao excluir dívida.');
         return false;
@@ -92,4 +89,56 @@ export function useDeleteLedger() {
   );
 
   return { deleteLedger, loading, error, reset };
+}
+
+// Hook para aceitar uma dívida
+export function useAcceptLedger() {
+  const { execute, loading, error, reset } = useFetch<Ledger>();
+
+  const acceptLedger = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const response = await execute(`/ledger/${id}/accept`, {
+          method: 'PATCH',
+        });
+        if (response) {
+          toast.success('Dívida aceita com sucesso!');
+          return true;
+        }
+        return false;
+      } catch {
+        toast.error('Erro ao aceitar dívida.');
+        return false;
+      }
+    },
+    [execute],
+  );
+
+  return { acceptLedger, loading, error, reset };
+}
+
+// Hook para recusar uma dívida
+export function useRejectLedger() {
+  const { execute, loading, error, reset } = useFetch<Ledger>();
+
+  const rejectLedger = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const response = await execute(`/ledger/${id}/reject`, {
+          method: 'PATCH',
+        });
+        if (response) {
+          toast.success('Dívida recusada.');
+          return true;
+        }
+        return false;
+      } catch {
+        toast.error('Erro ao recusar dívida.');
+        return false;
+      }
+    },
+    [execute],
+  );
+
+  return { rejectLedger, loading, error, reset };
 }

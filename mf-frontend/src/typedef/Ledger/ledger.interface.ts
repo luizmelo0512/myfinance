@@ -15,12 +15,19 @@ export enum TransactionType {
   PAYMENT = 'PAYMENT',
 }
 
+export enum LedgerStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+}
+
 export interface Ledger {
   id: string;
   title: string;
   ownerId: string;
   participantId: string | null;
   targetName: string;
+  status: LedgerStatus;
   createdAt: string;
   transactions: Transaction[];
 }

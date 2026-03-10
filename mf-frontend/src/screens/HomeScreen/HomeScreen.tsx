@@ -8,6 +8,7 @@ import { Button } from '@/src/components/ui/button';
 import { useAuth } from '@/src/contexts/AuthContext';
 import {
   Ledger,
+  LedgerStatus,
   Transaction,
   TransactionType,
 } from '@/src/typedef/Ledger/ledger.interface';
@@ -51,7 +52,10 @@ const HomeScreen = () => {
       // Prepara dados para o gráfico de barras
       const chartDataMap: Record<string, { name: string; Dividas: number; Pagamentos: number }> = {};
 
-      ledgers.forEach((ledger) => {
+      // Filtrar apenas dívidas aceitas para cálculos
+      const acceptedLedgers = ledgers.filter(l => l.status === LedgerStatus.ACCEPTED);
+
+      acceptedLedgers.forEach((ledger) => {
         let ledgerDebt = 0;
         let ledgerPayment = 0;
 

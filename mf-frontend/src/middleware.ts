@@ -2,10 +2,8 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Em produção (HTTPS), o cookie tem prefixo __Secure-
-  const token =
-    request.cookies.get('__Secure-better-auth.session_token')?.value ||
-    request.cookies.get('better-auth.session_token')?.value;
+  // Cookie do Quarkus JWT (mf_session_token)
+  const token = request.cookies.get('mf_session_token')?.value;
 
   const { pathname } = request.nextUrl;
 

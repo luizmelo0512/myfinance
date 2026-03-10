@@ -2,7 +2,7 @@
 
 import { Skeleton } from '@/src/components/ui/skeleton';
 
-import { useLedgerDetail, useDeleteLedger } from '@/src/actions/ledger/ledger-action';
+import { useLedgerDetail, useDeleteLedger, useAcceptLedger, useRejectLedger } from '@/src/actions/ledger/ledger-action';
 import { useCreateTransaction, useDeleteTransaction } from '@/src/actions/transaction/transaction-action';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -31,13 +31,16 @@ import {
 import { Textarea } from '@/src/components/ui/textarea';
 import {
   LedgerWithBalance,
+  LedgerStatus,
   Transaction,
   TransactionType,
 } from '@/src/typedef/Ledger/ledger.interface';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { cn } from '@utils';
 import {
   ArrowLeft,
   Calendar,
+  Check,
   Download,
   Filter,
   Info,
@@ -45,6 +48,7 @@ import {
   Menu,
   Plus,
   RefreshCw,
+  ShieldAlert,
   Trash2,
   TrendingDown,
   TrendingUp,
@@ -91,6 +95,9 @@ const LedgerDetailScreen = ({ ledgerId }: LedgerDetailScreenProps) => {
   const { createTransaction, loading: creating } = useCreateTransaction();
   const { deleteTransaction, loading: deletingTxn } = useDeleteTransaction();
   const { deleteLedger, loading: deletingLedger } = useDeleteLedger();
+  const { acceptLedger, loading: acceptingLedger } = useAcceptLedger();
+  const { rejectLedger, loading: rejectingLedger } = useRejectLedger();
+  const { user } = useAuth();
 
   const { control, handleSubmit, reset, setValue } =
     useForm<CreateTransactionFormData>({
@@ -254,6 +261,10 @@ const LedgerDetailScreen = ({ ledgerId }: LedgerDetailScreenProps) => {
     );
   }
 
+  const isNotAccepted = ledger?.status !== LedgerStatus.ACCEPTED;
+  const isPending = ledger?.status === LedgerStatus.PENDING;
+  const isParticipant = ledger?.participantId === user?.id;
+
   const generateSpecificPDF = () => {
     if (!ledger) return;
 
@@ -361,7 +372,72 @@ const LedgerDetailScreen = ({ ledgerId }: LedgerDetailScreenProps) => {
 
   return (
     <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-24 sm:pb-8">
-      {/* Header */}
+      {/* Pending/Rejected Banner */}
+      {isPending && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm">
+          <ShieldAlert className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5 sm:mt-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-500">Dívida Pendente</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {isParticipant
+                ? 'Esta dívida foi criada por outra pessoa e precisa da sua aprovação.'
+                : 'Aguardando aprovação do participante. Lançamentos serão liberados após a aceitação.'}
+            </p>
+          </div>
+          {isParticipant && (
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button
+                size="sm"
+                onClick={async () => {
+                  if (!ledger) return;
+                  const ok = await acceptLedger(ledger.id);
+                  if (ok) loadLedger();
+                }}
+                disabled={acceptingLedger || rejectingLedger}
+                className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                <Check className="w-4 h-4 mr-1" />
+                Aceitar
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  if (!ledger) return;
+                  const ok = await rejectLedger(ledger.id);
+                  if (ok) loadLedger();
+                }}
+                disabled={acceptingLedger || rejectingLedger}
+                className="flex-1 sm:flex-initial border-destructive/50 text-destructive hover:bg-destructive/10"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Recusar
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+      {ledger?.status === LedgerStatus.REJECTED && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl border border-destructive/30 bg-destructive/10 backdrop-blur-sm">
+          <X className="w-5 h-5 text-destructive flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-destructive">Dívida Recusada</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Esta dívida foi recusada pelo participante. Não é possível adicionar lançamentos.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!ledger && !loading && (
+        <div className="flex justify-center p-8">
+          <p className="text-muted-foreground">Ocorreu um erro ou a dívida não foi encontrada.</p>
+        </div>
+      )}
+
+      {ledger && (
+        <div className="flex flex-col gap-6">
+          {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
         <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
           <Link href="/ledgers" className="flex-shrink-0">
@@ -371,11 +447,11 @@ const LedgerDetailScreen = ({ ledgerId }: LedgerDetailScreenProps) => {
           </Link>
           <div className="min-w-0 flex-1">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate block">
-              {ledger.title}
+              {ledger?.title}
             </h2>
             <p className="text-muted-foreground truncate block">
               Contraparte:{' '}
-              <span className="text-primary">{ledger.targetName}</span>
+              <span className="text-primary">{ledger?.targetName}</span>
             </p>
           </div>
         </div>
@@ -451,7 +527,11 @@ const LedgerDetailScreen = ({ ledgerId }: LedgerDetailScreenProps) => {
           {/* Botão Novo Lançamento */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/80 shadow-[0_0_15px_-3px_var(--primary)]">
+              <Button
+                className="bg-primary text-primary-foreground hover:bg-primary/80 shadow-[0_0_15px_-3px_var(--primary)]"
+                disabled={isNotAccepted}
+                title={isNotAccepted ? 'Dívida precisa ser aceita para adicionar lançamentos' : ''}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Lançamento
               </Button>
@@ -1035,11 +1115,12 @@ const LedgerDetailScreen = ({ ledgerId }: LedgerDetailScreenProps) => {
               : 'bg-primary text-primary-foreground shadow-[0_0_20px_-3px_var(--primary)]'
           )}
         >
-          {fabOpen ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
         </button>
       </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export { LedgerDetailScreen };
+export default LedgerDetailScreen;

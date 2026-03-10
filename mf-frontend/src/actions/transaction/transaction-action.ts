@@ -42,11 +42,8 @@ export function useDeleteTransaction() {
         const response = await execute(`/transactions/${transactionId}`, {
           method: 'DELETE',
         });
-        if (response) {
-          toast.success('Transação excluída com sucesso!');
-          return true;
-        }
-        return false;
+        toast.success('Transação excluída com sucesso!');
+        return true;
       } catch {
         toast.error('Erro ao excluir transação.');
         return false;

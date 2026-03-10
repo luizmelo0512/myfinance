@@ -38,6 +38,11 @@ export function useLoginAction() {
         return response;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
+        if (err?.violations && err.violations.length > 0) {
+          toast.error(err.violations[0].message);
+          return undefined;
+        }
+
         switch (err.code) {
           case 'INVALID_EMAIL':
             toast.error('O e-mail informado é inválido.');
@@ -119,6 +124,11 @@ export function useCreateAccount() {
         return response;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
+        if (err?.violations && err.violations.length > 0) {
+          toast.error(err.violations[0].message);
+          return undefined;
+        }
+
         switch (err.code) {
           case 'INVALID_EMAIL':
             toast.error('O e-mail informado é inválido.');

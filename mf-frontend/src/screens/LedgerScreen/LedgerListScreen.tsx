@@ -2,7 +2,7 @@
 
 import { Skeleton } from '@/src/components/ui/skeleton';
 
-import { useLedgerList } from '@/src/actions/ledger/ledger-action';
+import { useLedgerList, useAcceptLedger, useRejectLedger } from '@/src/actions/ledger/ledger-action';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -12,9 +12,10 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 
-import { Ledger, TransactionType } from '@/src/typedef/Ledger/ledger.interface';
+import { Ledger, LedgerStatus, TransactionType } from '@/src/typedef/Ledger/ledger.interface';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { cn } from '@utils';
-import { ArrowRight, HandCoins, Plus, RefreshCw, Users, X } from 'lucide-react';
+import { ArrowRight, Check, HandCoins, Plus, RefreshCw, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import DialogNewLedger from './DialogNewLedger';
@@ -24,8 +25,12 @@ const LedgerListScreen = () => {
   const [ledgers, setLedgers] = useState<Ledger[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'settled'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending_balance' | 'settled' | 'pending_approval'>('all');
   const [initialLoading, setInitialLoading] = useState(true);
+
+  const { user } = useAuth();
+  const { acceptLedger, loading: accepting } = useAcceptLedger();
+  const { rejectLedger, loading: rejecting } = useRejectLedger();
 
   const { fetchLedgers, loading } = useLedgerList();
 
@@ -139,7 +144,8 @@ const LedgerListScreen = () => {
         <div className="flex gap-2 flex-wrap">
           {[
             { key: 'all' as const, label: 'Todas' },
-            { key: 'pending' as const, label: 'Com Saldo Pendente' },
+            { key: 'pending_approval' as const, label: `Pendentes${ledgers.filter(l => l.status === LedgerStatus.PENDING).length > 0 ? ` (${ledgers.filter(l => l.status === LedgerStatus.PENDING).length})` : ''}` },
+            { key: 'pending_balance' as const, label: 'Com Saldo Pendente' },
             { key: 'settled' as const, label: 'Quites' },
           ].map((f) => (
             <Button
@@ -185,9 +191,11 @@ const LedgerListScreen = () => {
           {ledgers
             .filter((ledger) => {
               if (filter === 'all') return true;
+              if (filter === 'pending_approval') return ledger.status === LedgerStatus.PENDING;
+              // For balance filters, only show accepted ledgers
               const balance = calculateBalance(ledger);
-              if (filter === 'pending') return balance !== 0;
-              return balance === 0;
+              if (filter === 'pending_balance') return ledger.status === LedgerStatus.ACCEPTED && balance !== 0;
+              return ledger.status === LedgerStatus.ACCEPTED && balance === 0;
             })
             .map((ledger) => {
             const balance = calculateBalance(ledger);
@@ -209,12 +217,22 @@ const LedgerListScreen = () => {
                     <CardDescription className="flex items-center gap-1.5 min-w-0">
                       <Users className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
                       <span className="truncate block font-medium">{ledger.targetName}</span>
-                      <Badge
-                        variant={balance === 0 ? 'default' : 'destructive'}
-                        className="text-[10px] ml-auto flex-shrink-0"
-                      >
-                        {balance === 0 ? 'Quite' : balance > 0 ? 'Devendo' : 'A receber'}
-                      </Badge>
+                      {ledger.status === LedgerStatus.PENDING ? (
+                        <Badge variant="outline" className="text-[10px] ml-auto flex-shrink-0 border-amber-500/50 text-amber-500 bg-amber-500/10">
+                          Pendente
+                        </Badge>
+                      ) : ledger.status === LedgerStatus.REJECTED ? (
+                        <Badge variant="destructive" className="text-[10px] ml-auto flex-shrink-0">
+                          Recusada
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant={balance === 0 ? 'default' : 'destructive'}
+                          className="text-[10px] ml-auto flex-shrink-0"
+                        >
+                          {balance === 0 ? 'Quite' : balance > 0 ? 'Devendo' : 'A receber'}
+                        </Badge>
+                      )}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="relative z-10">
@@ -252,6 +270,38 @@ const LedgerListScreen = () => {
                         {new Date(ledger.createdAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
+                    {/* Accept/Reject buttons for pending ledgers where user is participant */}
+                    {ledger.status === LedgerStatus.PENDING && ledger.participantId === user?.id && (
+                      <div className="pt-3 mt-3 border-t border-border/30 flex gap-2" onClick={(e) => e.preventDefault()}>
+                        <Button
+                          size="sm"
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            const ok = await acceptLedger(ledger.id);
+                            if (ok) loadLedgers();
+                          }}
+                          disabled={accepting || rejecting}
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                        >
+                          <Check className="w-3.5 h-3.5 mr-1" />
+                          Aceitar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            const ok = await rejectLedger(ledger.id);
+                            if (ok) loadLedgers();
+                          }}
+                          disabled={accepting || rejecting}
+                          className="flex-1 border-destructive/50 text-destructive hover:bg-destructive/10 text-xs"
+                        >
+                          <X className="w-3.5 h-3.5 mr-1" />
+                          Recusar
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </Link>

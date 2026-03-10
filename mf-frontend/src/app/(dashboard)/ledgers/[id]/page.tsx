@@ -1,6 +1,6 @@
 'use client';
 
-import { LedgerDetailScreen } from '@/src/screens/LedgerScreen/LedgerDetailScreen';
+import LedgerDetailScreen from '@/src/screens/LedgerScreen/LedgerDetailScreen';
 import { use } from 'react';
 
 interface LedgerDetailPageProps {

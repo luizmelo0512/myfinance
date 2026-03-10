@@ -6,6 +6,12 @@ import {
   OneToMany,
 } from 'typeorm';
 
+export enum LedgerStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+}
+
 @Entity('ledgers') // Nome da tabela no banco
 export class Ledger {
   @PrimaryGeneratedColumn('uuid')
@@ -22,6 +28,12 @@ export class Ledger {
 
   @Column()
   targetName: string; // Nome/Apelido do usuario vinculado
+
+  @Column({
+    type: 'varchar',
+    default: LedgerStatus.ACCEPTED,
+  })
+  status: LedgerStatus;
 
   @CreateDateColumn()
   createdAt: Date;
