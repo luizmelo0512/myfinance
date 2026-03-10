@@ -29,11 +29,15 @@ fi
 echo "⏹️ Parando containers em execução..."
 docker compose down
 
-echo "📦 Construindo o backend (Quarkus) com Maven..."
+echo "📦 Construindo o backend (Quarkus) com Maven usando Docker..."
 if [ -d "mf-backend" ]; then
-    cd mf-backend
-    ./mvnw clean package -DskipTests
-    cd ..
+    # Usa uma imagem do Maven com Java 21 para compilar o projeto sem precisar ter Java instalado
+    docker run --rm \
+      -v "$(pwd)/mf-backend:/usr/src/app" \
+      -v "$HOME/.m2:/root/.m2" \
+      -w /usr/src/app \
+      maven:3.9-eclipse-temurin-21 \
+      mvn clean package -DskipTests
 else
     echo "⚠️ Diretório mf-backend não encontrado. Pulando build do Maven."
 fi
