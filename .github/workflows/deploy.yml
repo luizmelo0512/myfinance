@@ -33,6 +33,18 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
           BACKEND_URL: http://backend:8080
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build Backend (Quarkus)
+        working-directory: ./mf-backend
+        run: ./mvnw clean package -DskipTests
+
+
       - name: Prepare Deployment Bundle
         run: |
           # Create folder structure for deployment
@@ -74,7 +86,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Set the destination directory on the server
-            APP_DIR="~/my-finance"
+            APP_DIR="~/workspace/myfinance"
             mkdir -p $APP_DIR
             
             # Extract the bundle
