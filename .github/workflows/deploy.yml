@@ -1,4 +1,4 @@
-name: Build and Deploy Next.js to Oracle VM
+name: Build Produção
 
 on:
   push:
