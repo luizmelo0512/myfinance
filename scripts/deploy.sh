@@ -21,12 +21,11 @@ cd "$PROJECT_ROOT" || exit 1
 # git pull origin main
 
 # Carrega variáveis de ambiente, se necessário
-# se o arquivo .env estiver na raiz do projeto:
-if [ -f ".env" ]; then
-    echo "⚙️ Carregando variáveis de ambiente do .env..."
-    export $(cat .env | grep -v '#' | awk '/=/ {print $1}')
+# o arquivo .env agora está dentro do mf-backend
+if [ -f "mf-backend/.env" ]; then
+    echo "⚙️ Carregando variáveis de ambiente do mf-backend/.env..."
+    export $(cat mf-backend/.env | grep -v '#' | awk '/=/ {print $1}')
 fi
-
 echo "⏹️ Parando containers em execução..."
 docker compose down
 
